@@ -25,6 +25,8 @@ public class PlayerMatch : MonoBehaviour
 
     private List<Cell> myMovementCells = null;
 
+    private float myPlanificationTime = 0;
+
     public void SetCanPlay(bool aNewState)
     {
         myCanPlay = aNewState;
@@ -38,7 +40,14 @@ public class PlayerMatch : MonoBehaviour
         if (!myActiveUnit)
             return;
 
-        if(Input.GetMouseButtonDown(1))
+        myPlanificationTime += Time.deltaTime;
+        MatchManager.GetInstance().SetTimerTime(1 - myPlanificationTime / Data.myPlanificationTimeForUnit);
+        if(myPlanificationTime >= Data.myPlanificationTimeForUnit)
+        {
+            EndTurn();
+        }
+
+        if (Input.GetMouseButtonDown(1))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if(Physics.Raycast(ray, out RaycastHit hit, 5000))
@@ -77,6 +86,7 @@ public class PlayerMatch : MonoBehaviour
 
     public void EndTurn()
     {
+        myPlanificationTime = 0;
         for (int i = 0; i < myMovementCells.Count; i++)
         {
             myMovementCells[i].ResetColor();

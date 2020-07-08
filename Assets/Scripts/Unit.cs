@@ -134,7 +134,7 @@ public class Unit : MonoBehaviour
 
     public bool Resolve()
     {
-        if (myStep >= 1)
+        if (myStep >= 1 || myMovementCells == null)
         {
             return true;
         }
@@ -156,9 +156,10 @@ public class Unit : MonoBehaviour
     {
         myMovementCellsIndex++;
         myStep = 0;
-        if (myMovementCellsIndex >= myMovementCells.Length)
+        if (myMovementCells != null && myMovementCellsIndex >= myMovementCells.Length)
         {
             myIsInMovement = false;
+            myMovementCells = null;
         }
     }
 

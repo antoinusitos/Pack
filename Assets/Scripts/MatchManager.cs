@@ -46,6 +46,9 @@ public class MatchManager : MonoBehaviour
 
     private Unit[] myInitiativeOrder = null;
 
+    [SerializeField]
+    private Image myTimerImage = null;
+
     private void Awake()
     {
         myInstance = this;
@@ -438,5 +441,10 @@ public class MatchManager : MonoBehaviour
     public Cell GetCell(int aX, int aZ)
     {
         return myBoard[aZ * Data.myboardXSize + aX];
+    }
+
+    public void SetTimerTime(float aRatio)
+    {
+        myTimerImage.fillAmount = aRatio;
     }
 }

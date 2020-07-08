@@ -25,6 +25,8 @@
     public static int myCellSize = 1;
 
     public static float myResolutionSpeed = 1.0f;
+
+    public static float myPlanificationTimeForUnit = 15.0f;
 }
 
 //Board = All the cells for the match
