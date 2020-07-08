@@ -113,16 +113,30 @@ public class Unit : MonoBehaviour
         myLineRenderer.SetPosition(1, myTargetCell.transform.position + Vector3.up * 0.5f);
 
         myMovementCells = new Cell[dist];
-        bool goLeft = myCurrentCell.GetX() > myTargetCell.GetX();
         for(int i = 0; i < myMovementCells.Length; i++)
         {
-            if(goLeft)
+            //left
+            if(myCurrentCell.GetX() > myTargetCell.GetX())
             {
                 myMovementCells[i] = MatchManager.GetInstance().GetCell(myCurrentCell.GetX() - 1 * (i + 1), myCurrentCell.GetZ());
             }
-            else
+            //right
+            else if(myCurrentCell.GetX() < myTargetCell.GetX())
             {
                 myMovementCells[i] = MatchManager.GetInstance().GetCell(myCurrentCell.GetX() + 1 * (i + 1), myCurrentCell.GetZ());
+            }
+            else
+            {
+                //backward
+                if (myCurrentCell.GetZ() > myTargetCell.GetZ())
+                {
+                    myMovementCells[i] = MatchManager.GetInstance().GetCell(myCurrentCell.GetX(), myCurrentCell.GetZ() - 1 * (i + 1));
+                }
+                //forward
+                else if (myCurrentCell.GetZ() < myTargetCell.GetZ())
+                {
+                    myMovementCells[i] = MatchManager.GetInstance().GetCell(myCurrentCell.GetX(), myCurrentCell.GetZ() + 1 * (i + 1));
+                }
             }
         }
     }
@@ -144,9 +158,6 @@ public class Unit : MonoBehaviour
             myIsInMovement = true;
             myStep += Time.deltaTime * Data.myResolutionSpeed;
             return MoveToStep(myMovementCells[myMovementCellsIndex].transform.position, myStartPos);
-            //StartCoroutine(MoveTo(myMovementCells[myMovementCellsIndex].transform.position, transform.position));
-            
-            //return true;
         }
 
         return true;
@@ -170,23 +181,17 @@ public class Unit : MonoBehaviour
         {
             myStep = 0;
             SetCurrentCell(myMovementCells[myMovementCellsIndex]);
-            //myMovementCellsIndex++;
             myStartPos = aTarget;
             return true;
         }
         return false;
     }
 
-    /*private IEnumerator MoveTo(Vector3 aTarget, Vector3 aStartPos)
+    public void ResetBeforeTurn()
     {
-        float timer = 0;
-        while(timer < 1)
-        {
-            transform.position = Vector3.Lerp(aStartPos, aTarget, timer);
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        transform.position = aTarget;
-    }*/
+        myIsInMovement = false;
+        myMovementCells = null;
+        myMovementCellsIndex = 0;
+        myStep = 0;
+    }
 }

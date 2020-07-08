@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -48,6 +49,12 @@ public class MatchManager : MonoBehaviour
 
     [SerializeField]
     private Image myTimerImage = null;
+
+    private int myPlayer1Score = 0;
+    private int myPlayer2Score = 0;
+
+    [SerializeField]
+    private Text myPlayersScoreText = null;
 
     private void Awake()
     {
@@ -253,6 +260,11 @@ public class MatchManager : MonoBehaviour
         //turn loop
         while (myMatchState != Data.MatchState.ENDING)
         {
+            for (int i = 0; i < myInitiativeOrder.Length; i++)
+            {
+                myInitiativeOrder[i].ResetBeforeTurn();
+            }
+
             myMatchState = Data.MatchState.PLANIFICATION;
             myMatchStateText.text = "PLANIFICATION PLAYER 1";
 
@@ -286,29 +298,6 @@ public class MatchManager : MonoBehaviour
             Unit[] tempUnit = new Unit[myInitiativeOrder.Length];
             tempUnit[0] = myInitiativeOrder[0];
             int unitAdded = 0;
-
-            /*while(resolve)
-            {
-                resolve = false;
-                for(int i = 0; i < unitAdded + 1; i++)
-                {
-                    if (tempUnit[i] != null)
-                    {
-                        bool found = tempUnit[i].Resolve();
-                        if (found)
-                            resolve = true;
-                        else
-                            tempUnit[i] = null;
-                    }
-                }
-                yield return new WaitForSeconds(0.1f);
-                if(unitAdded < myInitiativeOrder.Length - 1)
-                {
-                    unitAdded++;
-                    tempUnit[unitAdded] = myInitiativeOrder[unitAdded];
-                    resolve = true;
-                }
-            }*/
 
             bool inTurn = true;
             while(inTurn)
@@ -416,16 +405,33 @@ public class MatchManager : MonoBehaviour
 
         for(int i = 0; i <= aMovementSize; i++)
         {
-            if(index + i < myBoard.Length)
+            //right
+            if (index + i < myBoard.Length)
             {
                 Cell cell = myBoard[index + i];
                 if(cell != null && cell.GetZ() == aCell.GetZ())
                     cells.Add(cell);
             }
+            //left
             if (index - i >= 0)
             {
                 Cell cell = myBoard[index - i];
                 if (cell != null && cell.GetZ() == aCell.GetZ())
+                    cells.Add(cell);
+            }
+
+            //forward
+            if (index + i * Data.myboardZSize < myBoard.Length)
+            {
+                Cell cell = myBoard[index + i * Data.myboardZSize];
+                if (cell != null && cell.GetX() == aCell.GetX())
+                    cells.Add(cell);
+            }
+            //backward
+            if (index - i * Data.myboardZSize >= 0)
+            {
+                Cell cell = myBoard[index - i * Data.myboardZSize];
+                if (cell != null && cell.GetX() == aCell.GetX())
                     cells.Add(cell);
             }
         }
@@ -446,5 +452,19 @@ public class MatchManager : MonoBehaviour
     public void SetTimerTime(float aRatio)
     {
         myTimerImage.fillAmount = aRatio;
+    }
+
+    public void TeamAddScore(int aTeam, int aValue)
+    {
+        if(aTeam == 1)
+        {
+            myPlayer1Score += aValue;
+        }
+        else
+        {
+            myPlayer2Score += aValue;
+        }
+
+        myPlayersScoreText.text = "Player 1 : " + myPlayer1Score + " - " + myPlayer2Score + " : Player 2";
     }
 }
