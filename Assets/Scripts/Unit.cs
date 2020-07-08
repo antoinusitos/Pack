@@ -101,7 +101,7 @@ public class Unit : MonoBehaviour
     {
         myStartPos = transform.position;
 
-        myCurrentCell.SetIsOCcupied(false, null);
+        //myCurrentCell.SetIsOCcupied(false, null);
         myTargetCell = aCell;
 
         int distX = myTargetCell.GetX() - myCurrentCell.GetX();
@@ -179,6 +179,24 @@ public class Unit : MonoBehaviour
         transform.position = Vector3.Lerp(aStartPos, aTarget, myStep);
         if(myStep >= 1)
         {
+            /*if(myMovementCells[myMovementCellsIndex].GetIsOccupied())
+            {
+                Unit meetingUnit = myMovementCells[myMovementCellsIndex].GetUnit();
+                if(meetingUnit != null)
+                {
+                    if(meetingUnit.GetMovementFinished())
+                    {
+                        //not moving
+                        Debug.Log("Je lui défonce sa gueule");
+                    }
+                    else
+                    {
+                        //not moving
+                        Debug.Log("y a bagarre ?!");
+                    }
+                }
+            }*/
+
             myStep = 0;
             SetCurrentCell(myMovementCells[myMovementCellsIndex]);
             myStartPos = aTarget;
@@ -193,5 +211,18 @@ public class Unit : MonoBehaviour
         myMovementCells = null;
         myMovementCellsIndex = 0;
         myStep = 0;
+    }
+
+    public Cell GetCurrentCell()
+    {
+        return myCurrentCell;
+    }
+
+    public Cell GetNextCell()
+    {
+        if (myMovementCells == null)
+            return null;
+
+        return myMovementCells[myMovementCellsIndex];
     }
 }

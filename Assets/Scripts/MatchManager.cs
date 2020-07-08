@@ -294,6 +294,8 @@ public class MatchManager : MonoBehaviour
             myMatchStateText.text = "RESOLUTION";
             yield return new WaitForSeconds(1);
 
+            CheckConflicts(myInitiativeOrder);
+
             bool resolve = true;
             Unit[] tempUnit = new Unit[myInitiativeOrder.Length];
             tempUnit[0] = myInitiativeOrder[0];
@@ -467,4 +469,68 @@ public class MatchManager : MonoBehaviour
 
         myPlayersScoreText.text = "Player 1 : " + myPlayer1Score + " - " + myPlayer2Score + " : Player 2";
     }
+
+    public void CheckConflicts(Unit[] someUnits)
+    {
+        //all active units
+        for (int i = 0; i < someUnits.Length; i++)
+        {
+            //we do not move next resolution turn
+            Cell cell = someUnits[i].GetNextCell();
+            if (cell == null)
+                continue;
+
+            if(cell.GetIsOccupied())
+            {
+                Unit unitInCell = cell.GetUnit();
+                if(unitInCell != null)
+                {
+                    bool found = false;
+                    for (int j = 0; j < someUnits.Length; j++)
+                    {
+                        //check if the unit is active
+                        if(someUnits[j] == unitInCell)
+                        {
+                            found = true;
+                            if (someUnits[j].GetNextCell() != null)
+                            {
+                                Debug.Log("Might be a conflict");
+                            }
+                            else
+                            {
+                                Debug.Log("I destroy the standing unit");
+                            }
+                            break;
+                        }
+                    }
+
+                    if(!found)
+                    {
+                        Debug.Log("I destroy the standing unit");
+                    }
+                }
+            }
+        }
+
+            /*for (int i = 0; i < someUnits.Length; i++)
+            {
+                for (int j = 0; j < someUnits.Length; j++)
+                {
+                    if (i == j)
+                        continue;
+
+                    if (someUnits[i].GetMovementFinished())
+                        break;
+
+                    if (someUnits[j].GetMovementFinished())
+                    {
+                        //meeting unit is stopped
+                        if(someUnits[j].GetCurrentCell() == someUnits[i].GetNextCell())
+                        {
+                            Debug.Log("CONFLICT");
+                        }
+                    }
+                }
+            }*/
+        }
 }
