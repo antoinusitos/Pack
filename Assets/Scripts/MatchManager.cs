@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
+using UnityEngine.Jobs;
 using UnityEngine.UI;
 
 public class MatchManager : MonoBehaviour
@@ -309,6 +310,10 @@ public class MatchManager : MonoBehaviour
                     bool allResolved = true;
                     for (int i = 0; i < unitAdded + 1; i++)
                     {
+                        if(tempUnit[i].GetNextActionType() == Data.NextActionType.MOVEMENT)
+                        {
+                            CheckConflict(tempUnit[i]);
+                        }
                         if (!tempUnit[i].Resolve())
                         {
                             allResolved = false;
@@ -470,8 +475,63 @@ public class MatchManager : MonoBehaviour
         myPlayersScoreText.text = "Player 1 : " + myPlayer1Score + " - " + myPlayer2Score + " : Player 2";
     }
 
+    public void CheckConflict(Unit aUnit)
+    {
+        if (aUnit == null)
+            return;
+
+        Cell nextCell = aUnit.GetNextCell();
+
+        if (nextCell == null)
+            return;
+
+        if(nextCell.GetIsOccupied())
+        {
+            Unit meetUnit = nextCell.GetUnit();
+            if (meetUnit == null)
+                return;
+
+            int meetUnitIniti = GetInitiativeOrderUnit(meetUnit);
+            int aUnitIniti = GetInitiativeOrderUnit(aUnit);
+
+            if(aUnitIniti < meetUnitIniti)
+            {
+                if(meetUnit.GetMovementFinished())
+                {
+                    Debug.Log("I destroy the standing unit");
+                    meetUnit.ResetBeforeTurn();
+                    //TODO : move the meet Unit in the cell behind
+                }
+                else if(meetUnit.GetNextCell() == aUnit.GetCurrentCell())
+                {
+                    Debug.Log("FIGHT !");
+                }
+                else
+                {
+                    Debug.Log("I destroy the moving unit");
+                    meetUnit.ResetBeforeTurn();
+                    //TODO : move the meet Unit in the cell behind
+                }
+            }
+        }
+
+    }
+
+    public int GetInitiativeOrderUnit(Unit aUnit)
+    {
+        for(int i = 0; i < myInitiativeOrder.Length; i++)
+        {
+            if (myInitiativeOrder[i] == aUnit)
+                return i;
+        }
+
+        return -1;
+    }
+
     public void CheckConflicts(Unit[] someUnits)
     {
+        return; 
+
         //all active units
         for (int i = 0; i < someUnits.Length; i++)
         {
@@ -511,26 +571,5 @@ public class MatchManager : MonoBehaviour
                 }
             }
         }
-
-            /*for (int i = 0; i < someUnits.Length; i++)
-            {
-                for (int j = 0; j < someUnits.Length; j++)
-                {
-                    if (i == j)
-                        continue;
-
-                    if (someUnits[i].GetMovementFinished())
-                        break;
-
-                    if (someUnits[j].GetMovementFinished())
-                    {
-                        //meeting unit is stopped
-                        if(someUnits[j].GetCurrentCell() == someUnits[i].GetNextCell())
-                        {
-                            Debug.Log("CONFLICT");
-                        }
-                    }
-                }
-            }*/
-        }
+    }
 }

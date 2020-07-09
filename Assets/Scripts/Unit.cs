@@ -53,6 +53,8 @@ public class Unit : MonoBehaviour
 
     private bool myIsInMovement = false;
 
+    private Data.NextActionType myNextActionType = Data.NextActionType.NONE;
+
     public int GetTeam()
     {
         return myTeam;
@@ -101,6 +103,7 @@ public class Unit : MonoBehaviour
     {
         myStartPos = transform.position;
 
+        myNextActionType = Data.NextActionType.MOVEMENT;
         //myCurrentCell.SetIsOCcupied(false, null);
         myTargetCell = aCell;
 
@@ -179,24 +182,6 @@ public class Unit : MonoBehaviour
         transform.position = Vector3.Lerp(aStartPos, aTarget, myStep);
         if(myStep >= 1)
         {
-            /*if(myMovementCells[myMovementCellsIndex].GetIsOccupied())
-            {
-                Unit meetingUnit = myMovementCells[myMovementCellsIndex].GetUnit();
-                if(meetingUnit != null)
-                {
-                    if(meetingUnit.GetMovementFinished())
-                    {
-                        //not moving
-                        Debug.Log("Je lui défonce sa gueule");
-                    }
-                    else
-                    {
-                        //not moving
-                        Debug.Log("y a bagarre ?!");
-                    }
-                }
-            }*/
-
             myStep = 0;
             SetCurrentCell(myMovementCells[myMovementCellsIndex]);
             myStartPos = aTarget;
@@ -211,6 +196,9 @@ public class Unit : MonoBehaviour
         myMovementCells = null;
         myMovementCellsIndex = 0;
         myStep = 0;
+        myNextActionType = Data.NextActionType.NONE;
+        myLineRenderer.SetPosition(0, transform.position + Vector3.up * 0.5f);
+        myLineRenderer.SetPosition(1, transform.position + Vector3.up * 0.5f);
     }
 
     public Cell GetCurrentCell()
@@ -224,5 +212,10 @@ public class Unit : MonoBehaviour
             return null;
 
         return myMovementCells[myMovementCellsIndex];
+    }
+
+    public Data.NextActionType GetNextActionType()
+    {
+        return myNextActionType;
     }
 }

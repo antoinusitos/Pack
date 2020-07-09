@@ -17,6 +17,12 @@
         ENDING
     }
 
+    public enum NextActionType
+    {
+        NONE,
+        MOVEMENT,
+    }
+
     public static int myPackMaxNumber = 8;
     public static int myPackStartNumber = 5;
 
