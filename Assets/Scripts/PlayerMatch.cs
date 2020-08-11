@@ -27,6 +27,11 @@ public class PlayerMatch : MonoBehaviour
 
     private float myPlanificationTime = 0;
 
+    private Data.NextActionType myACtionType = Data.NextActionType.MOVEMENT;
+
+    [SerializeField]
+    private GameObject myPassButton = null;
+
     public void SetCanPlay(bool aNewState)
     {
         myCanPlay = aNewState;
@@ -55,13 +60,47 @@ public class PlayerMatch : MonoBehaviour
                 Cell cell = hit.transform.GetComponent<Cell>();
                 if(cell != null)
                 {
-                    if(!cell.GetIsOccupied() && myMovementCells.Contains(cell))
+                    switch(myACtionType)
                     {
-                        myActiveUnit.MoveUnitToCell(cell);
-                        EndTurn();
+                        case Data.NextActionType.MOVEMENT:
+                        {
+                            if (!cell.GetIsOccupied() && myMovementCells.Contains(cell))
+                            {
+                                myActiveUnit.MoveUnitToCell(cell);
+                                EndTurn();
+                            }
+                            break;
+                        }
+                        case Data.NextActionType.PASS:
+                        {
+                            if (myMovementCells.Contains(cell) && myActiveUnit.GetDrone() != null)
+                            {
+                                myActiveUnit.Pass(cell);
+                                EndTurn();
+                                myACtionType = Data.NextActionType.MOVEMENT;
+                            }
+                            break;
+                        }
                     }
+
+                    
                 }
             }
+        }
+    }
+
+    public void SetActionType(int anActionType)
+    {
+        Data.NextActionType action = (Data.NextActionType)anActionType;
+        myACtionType = action;
+        switch (myACtionType)
+        {
+            case Data.NextActionType.MOVEMENT:
+
+                break;
+            case Data.NextActionType.PASS:
+                GetPassCells(myActiveUnit.GetCell(), 3);
+                break;
         }
     }
 
@@ -74,6 +113,14 @@ public class PlayerMatch : MonoBehaviour
         if(aUnit != null)
         {
             myDecisionPanel.SetActive(true);
+            if(aUnit.GetDrone() != null)
+            {
+                myPassButton.SetActive(true);
+            }
+            else
+            {
+                myPassButton.SetActive(false);
+            }
             myUnitIndexText.text = "Unit" + aUnit.GetIndex();
             aUnit.SetActive(true);
             GetMovementCells(aUnit.GetCell(), aUnit.GetAgility());
@@ -94,8 +141,29 @@ public class PlayerMatch : MonoBehaviour
         myMatchManager.EndOfPlanification(myTeam);
     }
 
-    private void GetMovementCells(Cell aCell, int aMovementSize)
+    public void GetMovementCells(Cell aCell, int aMovementSize)
     {
+        if (myMovementCells != null)
+        {
+            for (int i = 0; i < myMovementCells.Count; i++)
+            {
+                myMovementCells[i].ResetColor();
+            }
+        }
+
         myMovementCells = myMatchManager.GetMovementCells(aCell, aMovementSize);
+    }
+
+    public void GetPassCells(Cell aCell, int aPassSize)
+    {
+        if (myMovementCells != null)
+        {
+            for (int i = 0; i < myMovementCells.Count; i++)
+            {
+                myMovementCells[i].ResetColor();
+            }
+        }
+
+        myMovementCells = myMatchManager.GetPassCells(aCell, aPassSize);
     }
 }

@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class Unit : MonoBehaviour
 {
@@ -55,6 +54,8 @@ public class Unit : MonoBehaviour
 
     private Data.NextActionType myNextActionType = Data.NextActionType.NONE;
 
+    private Drone myDrone = null;
+
     public int GetTeam()
     {
         return myTeam;
@@ -87,6 +88,8 @@ public class Unit : MonoBehaviour
     public void SetCurrentCell(Cell aCell)
     {
         myCurrentCell = aCell;
+        if(myCurrentCell != null)
+            myCurrentCell.SetIsOCcupied(true, this);
     }
 
     public Cell GetCell()
@@ -185,9 +188,33 @@ public class Unit : MonoBehaviour
             myStep = 0;
             SetCurrentCell(myMovementCells[myMovementCellsIndex]);
             myStartPos = aTarget;
+            if(myCurrentCell.GetDrone() != null)
+            {
+                Drone drone = myCurrentCell.GetDrone();
+                myCurrentCell.SetDrone(null);
+                drone.SetCell(null);
+                drone.SetUnit(this);
+                myDrone = drone;
+            }
             return true;
         }
+        myCurrentCell.SetIsOCcupied(false, null);
         return false;
+    }
+
+    public Drone GetDrone()
+    {
+        return myDrone;
+    }
+
+    public void Pass(Cell aCell)
+    {
+        if(myDrone != null)
+        {
+            myDrone.transform.parent = null;
+            myDrone.MoveDroneToCell(aCell);
+            myDrone = null;
+        }
     }
 
     public void ResetBeforeTurn()
@@ -217,5 +244,10 @@ public class Unit : MonoBehaviour
     public Data.NextActionType GetNextActionType()
     {
         return myNextActionType;
+    }
+
+    public void SetDrone(Drone aDrone)
+    {
+        myDrone = aDrone;
     }
 }

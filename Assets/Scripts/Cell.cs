@@ -29,6 +29,8 @@ public class Cell : MonoBehaviour
 
     private Color myBaseColor = Color.white;
 
+    private Drone myDrone = null;
+
     public void Init(int anIndex, int aX, int aZ, Data.CellType aCellType)
     {
         myIndex = anIndex;
@@ -70,6 +72,16 @@ public class Cell : MonoBehaviour
         myBaseColor = mySpawnColor;
         myRenderer.material.SetColor("_Color", mySpawnColor);
         return this;
+    }
+
+    public void SetDrone(Drone aDrone)
+    {
+        myDrone = aDrone;
+    }
+
+    public Drone GetDrone()
+    {
+        return myDrone;
     }
 
     public void SetDroneSpawner()

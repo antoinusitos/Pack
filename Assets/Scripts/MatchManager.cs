@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
-using UnityEngine.Jobs;
 using UnityEngine.UI;
 
 public class MatchManager : MonoBehaviour
@@ -56,6 +54,11 @@ public class MatchManager : MonoBehaviour
 
     [SerializeField]
     private Text myPlayersScoreText = null;
+
+    [SerializeField]
+    private Drone myDronePrefab = null;
+
+    private Drone myDrone = null;
 
     private void Awake()
     {
@@ -220,6 +223,12 @@ public class MatchManager : MonoBehaviour
             unit.SetIndex(i);
             myPlayer2Units.Add(unit);
         }
+
+        //drone
+        Cell cellDrone = myBoard[myBoard.Length / 2];
+        myDrone = Instantiate(myDronePrefab, cellDrone.transform.position + Vector3.up * 0.5f, Quaternion.identity);
+        myDrone.SetCell(cellDrone);
+        cellDrone.SetDrone(myDrone);
     }
 
     private void LaunchGame()
@@ -232,6 +241,7 @@ public class MatchManager : MonoBehaviour
         myMatchState = Data.MatchState.PREPARATION;
         myMatchStateText.text = "PREPARATION";
 
+        //INIT
         myInitiativeOrder = new Unit[myPlayer1Units.Count + myPlayer2Units.Count];
         for(int i = 0; i < myPlayer1Units.Count; i++)
         {
@@ -265,6 +275,8 @@ public class MatchManager : MonoBehaviour
             {
                 myInitiativeOrder[i].ResetBeforeTurn();
             }
+
+            myDrone.ResetBeforeTurn();
 
             myMatchState = Data.MatchState.PLANIFICATION;
             myMatchStateText.text = "PLANIFICATION PLAYER 1";
@@ -308,6 +320,10 @@ public class MatchManager : MonoBehaviour
                 while (resolve)
                 {
                     bool allResolved = true;
+                    if(!myDrone.Resolve())
+                    {
+                        allResolved = false;
+                    }
                     for (int i = 0; i < unitAdded + 1; i++)
                     {
                         if(tempUnit[i].GetNextActionType() == Data.NextActionType.MOVEMENT)
@@ -325,6 +341,7 @@ public class MatchManager : MonoBehaviour
                     }
                     yield return null;
                 }
+                myDrone.NextStep();
                 for (int i = 0; i < unitAdded + 1; i++)
                 {
                     tempUnit[i].NextStep();
@@ -332,7 +349,6 @@ public class MatchManager : MonoBehaviour
 
                 if (unitAdded < myInitiativeOrder.Length - 1)
                 {
-                    
                     unitAdded++;
                     tempUnit[unitAdded] = myInitiativeOrder[unitAdded];
                     resolve = true;
@@ -439,6 +455,52 @@ public class MatchManager : MonoBehaviour
             {
                 Cell cell = myBoard[index - i * Data.myboardZSize];
                 if (cell != null && cell.GetX() == aCell.GetX())
+                    cells.Add(cell);
+            }
+        }
+
+        for (int i = 0; i < cells.Count; i++)
+        {
+            cells[i].SetColor(Color.magenta);
+        }
+
+        return cells;
+    }
+
+    public List<Cell> GetPassCells(Cell aCell, int aPassSize)
+    {
+        List<Cell> cells = new List<Cell>();
+
+        int index = aCell.GetIndex();
+
+        for (int i = 1; i <= aPassSize; i++)
+        {
+            //top left
+            if(index + (i * Data.myboardXSize) - i < myBoard.Length)
+            {
+                Cell cell = myBoard[index + (i * Data.myboardXSize) - i];
+                if(cell != null && cell.GetZ() == aCell.GetZ() + i)
+                    cells.Add(cell);
+            }
+            //top right
+            if (index + (i * Data.myboardXSize) + i < myBoard.Length)
+            {
+                Cell cell = myBoard[index + (i * Data.myboardXSize) + i];
+                if (cell != null && cell.GetZ() == aCell.GetZ() + i)
+                    cells.Add(cell);
+            }
+            //bottom left
+            if (index - (i * Data.myboardXSize) - i >= 0)
+            {
+                Cell cell = myBoard[index - (i * Data.myboardXSize) - i];
+                if (cell != null && cell.GetZ() == aCell.GetZ() - i)
+                    cells.Add(cell);
+            }
+            //bottom right
+            if (index - (i * Data.myboardXSize) + i >= 0)
+            {
+                Cell cell = myBoard[index - (i * Data.myboardXSize) + i];
+                if (cell != null && cell.GetZ() == aCell.GetZ() - i)
                     cells.Add(cell);
             }
         }

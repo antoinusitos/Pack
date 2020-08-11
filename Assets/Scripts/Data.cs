@@ -21,6 +21,7 @@
     {
         NONE,
         MOVEMENT,
+        PASS
     }
 
     public static int myPackMaxNumber = 8;
