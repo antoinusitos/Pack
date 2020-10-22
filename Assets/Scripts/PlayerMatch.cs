@@ -64,7 +64,7 @@ public class PlayerMatch : MonoBehaviour
                     {
                         case Data.NextActionType.MOVEMENT:
                         {
-                            if (!cell.GetIsOccupied() && myMovementCells.Contains(cell))
+                            if (myMovementCells.Contains(cell))
                             {
                                 myActiveUnit.MoveUnitToCell(cell);
                                 EndTurn();
